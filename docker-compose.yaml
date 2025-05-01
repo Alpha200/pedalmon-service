@@ -1,0 +1,13 @@
+services:
+  pedalmondb:
+    image: ghcr.io/baosystems/postgis:17-3.5
+    environment:
+      POSTGRES_USER: pedalmon
+      POSTGRES_PASSWORD: pedalmon
+      POSTGRES_DB: pedalmon
+    volumes:
+      - pedalmon:/var/lib/postgresql/data
+    ports:
+      - "5437:5432"
+volumes:
+  pedalmon:
