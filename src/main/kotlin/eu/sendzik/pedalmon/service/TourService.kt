@@ -8,7 +8,9 @@ import eu.sendzik.pedalmon.dto.TrainingCenterDatabaseDto
 import eu.sendzik.pedalmon.dto.toCustomPage
 import eu.sendzik.pedalmon.mapper.toDto
 import eu.sendzik.pedalmon.mapper.toEntity
+import eu.sendzik.pedalmon.model.TrackPoint
 import eu.sendzik.pedalmon.util.defaultGeometryFactory
+import jakarta.transaction.Transactional
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 
 @Service
+@Transactional
 class TourService(
 	private val tourRepository: TourRepository,
 ) {
@@ -25,11 +28,33 @@ class TourService(
 	}
 
 	fun importTcx(tcx: TrainingCenterDatabaseDto): TourDto {
-		val tour = Tour(
-			track = getTrackFromTcx(tcx)
+		val tour = tourRepository.save(
+			Tour(
+				track = getTrackFromTcx(tcx),
+				trackPoints = mutableListOf()
+			)
 		)
 
+		tour.trackPoints = getTrackPointsFromTcx(tcx).toMutableList()
+		tour.trackPoints.forEach { it.tour = tour }
+
 		return tourRepository.save(tour).toDto()
+	}
+
+	private fun getTrackPointsFromTcx(tcx: TrainingCenterDatabaseDto): List<TrackPoint> {
+		return tcx.activities.activityList.flatMap { activity ->
+			activity.laps.flatMap { lap ->
+				lap.tracks.first().trackpoints.map { trackPoint ->
+					TrackPoint(
+						latitude = trackPoint.position.latitudeDegrees,
+						longitude = trackPoint.position.longitudeDegrees,
+						time = trackPoint.time,
+						heartRateBpm = trackPoint.heartRateBpm?.value,
+					)
+				}
+			}
+
+		}
 	}
 
 	private fun getTrackFromTcx(tcx: TrainingCenterDatabaseDto): LineString {

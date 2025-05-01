@@ -3,6 +3,7 @@ package eu.sendzik.pedalmon.controller
 import eu.sendzik.pedalmon.dto.CustomPage
 import eu.sendzik.pedalmon.dto.SegmentDto
 import eu.sendzik.pedalmon.service.SegmentService
+import jakarta.validation.Valid
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -16,7 +17,7 @@ class SegmentController(
 	private val segmentService: SegmentService,
 ) {
 	@PostMapping()
-	fun createSegment(@RequestBody segment: SegmentDto): SegmentDto {
+	fun createSegment(@RequestBody @Valid segment: SegmentDto): SegmentDto {
 		return segmentService.createSegment(segment)
 	}
 

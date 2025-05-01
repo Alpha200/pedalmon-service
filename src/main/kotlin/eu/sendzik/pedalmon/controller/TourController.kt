@@ -4,6 +4,7 @@ import eu.sendzik.pedalmon.service.TourService
 import eu.sendzik.pedalmon.dto.CustomPage
 import eu.sendzik.pedalmon.dto.TourDto
 import eu.sendzik.pedalmon.dto.TrainingCenterDatabaseDto
+import jakarta.validation.Valid
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -17,7 +18,7 @@ class TourController(
 	private val tourService: TourService,
 ) {
 	@PostMapping()
-	fun createTour(tour: TourDto): TourDto {
+	fun createTour(@RequestBody @Valid tour: TourDto): TourDto {
 		return tourService.createTour(tour)
 	}
 

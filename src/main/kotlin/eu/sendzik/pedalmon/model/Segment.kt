@@ -15,6 +15,8 @@ class Segment(
 	@GeneratedValue(strategy = GenerationType.UUID)
 	var id: UUID? = null,
 
+	var name: String,
+
 	@Column(name = "point_start", columnDefinition = "geography")
 	var pointStart: Point,
 

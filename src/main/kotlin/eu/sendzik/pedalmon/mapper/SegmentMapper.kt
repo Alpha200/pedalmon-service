@@ -13,11 +13,11 @@ fun SegmentDto.toEntity(): Segment {
 	return Segment(
 		id = id,
 		pointStart = Point(
-			Coordinate(startPoint.first, startPoint.second).toCoordinateSequence(),
+			Coordinate(start.first, start.second).toCoordinateSequence(),
 			defaultGeometryFactory
 		),
 		pointEnd = Point(
-			Coordinate(endPoint.first, endPoint.second).toCoordinateSequence(),
+			Coordinate(end.first, end.second).toCoordinateSequence(),
 			defaultGeometryFactory
 		),
 		path = LineString(
@@ -25,17 +25,19 @@ fun SegmentDto.toEntity(): Segment {
 				.instance()
 				.create(path.map {Coordinate(it.first, it.second) }.toTypedArray()),
 			defaultGeometryFactory
-		)
+		),
+		name = name,
 	)
 }
 
 fun Segment.toDto(): SegmentDto {
 	return SegmentDto(
 		id = id,
-		startPoint = Pair(pointStart.y, pointStart.x),
-		endPoint = Pair(pointEnd.y, pointEnd.x),
+		start = Pair(pointStart.x, pointStart.y),
+		end = Pair(pointEnd.x, pointEnd.y),
 		path = path.coordinates.map {
 			Pair(it.x, it.y)
-		}
+		},
+		name = name,
 	)
 }
