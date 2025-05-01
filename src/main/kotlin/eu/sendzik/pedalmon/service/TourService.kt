@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service
 @Transactional
 class TourService(
 	private val tourRepository: TourRepository,
+	private val segmentRecordService: SegmentRecordService
 ) {
 	fun createTour(tourDto: TourDto): TourDto {
 		val tour = tourDto.toEntity()
@@ -28,17 +29,25 @@ class TourService(
 	}
 
 	fun importTcx(tcx: TrainingCenterDatabaseDto): TourDto {
-		val tour = tourRepository.save(
+		var tour = tourRepository.save(
 			Tour(
 				track = getTrackFromTcx(tcx),
-				trackPoints = mutableListOf()
+				trackPoints = mutableListOf(),
+				segmentRecords = mutableListOf(),
 			)
 		)
 
 		tour.trackPoints = getTrackPointsFromTcx(tcx).toMutableList()
 		tour.trackPoints.forEach { it.tour = tour }
+		tour = tourRepository.save(tour)
 
-		return tourRepository.save(tour).toDto()
+		tour.segmentRecords = segmentRecordService
+			.determineSegmentRecordsForTour(tour)
+			.toMutableList()
+		tour.segmentRecords.forEach { it.tour = tour }
+
+		tour = tourRepository.save(tour)
+		return tour.toDto()
 	}
 
 	private fun getTrackPointsFromTcx(tcx: TrainingCenterDatabaseDto): List<TrackPoint> {

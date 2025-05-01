@@ -5,11 +5,13 @@ import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Table
 import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.Point
 import java.util.UUID
 
-@Entity(name = "segment")
+@Entity
+@Table(name = "segment")
 class Segment(
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)

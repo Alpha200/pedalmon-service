@@ -5,4 +5,4 @@ import org.locationtech.jts.geom.PrecisionModel
 
 
 const val SRID_LATITUDE_LONGITUDE = 4326
-val defaultGeometryFactory: GeometryFactory by lazy { GeometryFactory(PrecisionModel(), 4326) }
+val defaultGeometryFactory: GeometryFactory by lazy { GeometryFactory(PrecisionModel(), SRID_LATITUDE_LONGITUDE) }

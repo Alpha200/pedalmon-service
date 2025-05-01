@@ -10,22 +10,24 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.ZonedDateTime
+import java.util.UUID
 
 @Entity
-@Table(name = "track_point")
-class TrackPoint(
+@Table(name = "segment_record")
+class SegmentRecord(
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	var id: Long? = null,
+	@GeneratedValue(strategy = GenerationType.UUID)
+	var id: UUID? = null,
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tourId", nullable = false)
 	var tour: Tour? = null,
-	@Column(name = "latitude")
-	var latitude: Double,
-	@Column(name = "longitude")
-	var longitude: Double,
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "segmentId", nullable = false)
+	var segment: Segment? = null,
+	@Column(name = "speed_kmh")
+	var speedKmh: Double,
+	@Column(name = "duration_s")
+	var durationS: Int,
 	@Column(name = "time")
 	var time: ZonedDateTime,
-	@Column(name = "heart_rate_bpm")
-	var heartRateBpm: Int?,
 )

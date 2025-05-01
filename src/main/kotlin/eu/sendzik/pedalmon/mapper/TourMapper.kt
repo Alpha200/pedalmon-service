@@ -17,6 +17,7 @@ fun TourDto.toEntity(): Tour {
 			defaultGeometryFactory
 		),
 		trackPoints = track.map { it.toEntity() }.toMutableList(),
+		segmentRecords = segmentRecords.map { it.toEntity() }.toMutableList(),
 	)
 
 	return tour
@@ -26,5 +27,6 @@ fun Tour.toDto(): TourDto {
 	return TourDto(
 		id = id,
 		track = trackPoints.map { it.toDto() }.toMutableList(),
+		segmentRecords = segmentRecords.map { it.toDto() }.toMutableList(),
 	)
 }

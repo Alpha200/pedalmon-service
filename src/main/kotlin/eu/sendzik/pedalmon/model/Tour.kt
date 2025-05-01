@@ -7,10 +7,12 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
+import jakarta.persistence.Table
 import org.locationtech.jts.geom.LineString
 import java.util.UUID
 
-@Entity(name = "tour")
+@Entity
+@Table(name = "tour")
 class Tour(
 	@Id
 	@GeneratedValue(strategy = GenerationType.UUID)
@@ -21,4 +23,7 @@ class Tour(
 
 	@OneToMany(mappedBy = "tour", cascade = [CascadeType.ALL], orphanRemoval = true)
 	var trackPoints: MutableList<TrackPoint>,
+
+	@OneToMany(mappedBy = "tour", cascade = [CascadeType.ALL])
+	var segmentRecords: MutableList<SegmentRecord>
 )
