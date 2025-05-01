@@ -10,12 +10,14 @@ import eu.sendzik.pedalmon.mapper.toDto
 import eu.sendzik.pedalmon.mapper.toEntity
 import eu.sendzik.pedalmon.model.TrackPoint
 import eu.sendzik.pedalmon.util.defaultGeometryFactory
+import jakarta.persistence.EntityNotFoundException
 import jakarta.transaction.Transactional
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 @Transactional
@@ -88,5 +90,12 @@ class TourService(
 
 	fun getTours(pageable: Pageable): CustomPage<TourDto> {
 		return tourRepository.findAll(pageable).toCustomPage().mapTo { it.toDto() }
+	}
+
+	fun getTour(id: UUID): TourDto {
+		return tourRepository
+			.findById(id)
+			.map { tour -> tour.toDto() }
+			.orElseThrow()
 	}
 }

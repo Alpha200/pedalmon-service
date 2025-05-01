@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.data.domain.Pageable
+import org.springframework.web.bind.annotation.PathVariable
+import java.util.UUID
 
 @RestController
 @RequestMapping("/tours")
@@ -30,5 +32,10 @@ class TourController(
 	@GetMapping()
 	fun getTours(pageable: Pageable): CustomPage<TourDto> {
 		return tourService.getTours(pageable)
+	}
+
+	@GetMapping("{id}")
+	fun getTour(@PathVariable id: UUID): TourDto {
+		return tourService.getTour(id)
 	}
 }
