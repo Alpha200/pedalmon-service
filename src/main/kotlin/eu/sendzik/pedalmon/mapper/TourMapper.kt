@@ -10,6 +10,10 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
 fun TourDto.toEntity(): Tour {
 	val tour = Tour(
 		id = id,
+		name = name,
+		averageSpeedKmh = averageSpeedKmh,
+		averageHeartRateBpm = averageHeartRateBpm,
+		distanceMeter = distanceMeter,
 		track = LineString(
 			CoordinateArraySequenceFactory
 				.instance()
@@ -26,6 +30,10 @@ fun TourDto.toEntity(): Tour {
 fun Tour.toDto(): TourDto {
 	return TourDto(
 		id = id,
+		name = name,
+		averageSpeedKmh = averageSpeedKmh,
+		averageHeartRateBpm = averageHeartRateBpm,
+		distanceMeter = distanceMeter,
 		track = trackPoints.map { it.toDto() }.toMutableList(),
 		segmentRecords = segmentRecords.map { it.toDto() }.toMutableList(),
 	)

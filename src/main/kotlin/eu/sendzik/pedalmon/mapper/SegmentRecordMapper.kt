@@ -11,6 +11,7 @@ fun SegmentRecordDto.toEntity(): SegmentRecord {
 		speedKmh = speedKmh,
 		durationS = durationS,
 		time = time,
+		rankCreated = rankCreated
 	)
 }
 
@@ -22,5 +23,6 @@ fun SegmentRecord.toDto(mapTour: Boolean = false): SegmentRecordDto {
 		speedKmh = speedKmh,
 		durationS = durationS,
 		time = time,
+		rankCreated = rankCreated
 	)
 }

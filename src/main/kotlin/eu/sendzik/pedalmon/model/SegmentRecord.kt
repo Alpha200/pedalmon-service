@@ -30,4 +30,6 @@ class SegmentRecord(
 	var durationS: Int,
 	@Column(name = "time")
 	var time: ZonedDateTime,
+	@Column(name = "rank_created")
+	var rankCreated: Int?,
 )

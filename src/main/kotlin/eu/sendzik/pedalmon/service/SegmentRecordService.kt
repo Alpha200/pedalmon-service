@@ -64,6 +64,7 @@ class SegmentRecordService(
 							durationS = duration.toInt(),
 							time = startTrackPoint.time,
 							segment = segment,
+							rankCreated = null,
 						)
 					)
 					startTrackPoint = null

@@ -18,6 +18,18 @@ class Tour(
 	@GeneratedValue(strategy = GenerationType.UUID)
 	var id: UUID? = null,
 
+	@Column(name = "name")
+	var name: String,
+
+	@Column(name = "average_speed_kmh")
+	var averageSpeedKmh: Double,
+
+	@Column(name = "average_heart_rate_bpm")
+	var averageHeartRateBpm: Int?,
+
+	@Column(name = "distance_m")
+	var distanceMeter: Int,
+
 	@Column(name = "track", columnDefinition = "geography")
 	var track: LineString,
 
