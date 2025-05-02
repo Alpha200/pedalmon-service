@@ -11,6 +11,7 @@ import eu.sendzik.pedalmon.model.Tour
 import eu.sendzik.pedalmon.model.TrackPoint
 import eu.sendzik.pedalmon.repository.SegmentRecordRepository
 import eu.sendzik.pedalmon.repository.SegmentRepository
+import getAverageSpeedKmh
 import jakarta.transaction.Transactional
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -38,8 +39,9 @@ class SegmentRecordService(
 	): List<SegmentRecord> {
 		var result = mutableListOf<SegmentRecord>()
 		var startTrackPoint: TrackPoint? = null
+		var startIndex = 0
 
-		for (trackPoint: TrackPoint in tour.trackPoints) {
+		tour.trackPoints.forEachIndexed { index, trackPoint ->
 			if (startTrackPoint == null) {
 				if(calculateDistanceMeter(
 						trackPoint.latitude,
@@ -48,6 +50,7 @@ class SegmentRecordService(
 						segment.pointStart.x
 					) <= 10) {
 					startTrackPoint = trackPoint
+					startIndex = index
 				}
 			} else {
 				if(calculateDistanceMeter(
@@ -56,13 +59,14 @@ class SegmentRecordService(
 						segment.pointEnd.y,
 						segment.pointEnd.x
 					) <= 10) {
-					val duration = Duration.between(startTrackPoint.time, trackPoint.time).toSeconds()
+					val duration = Duration.between(startTrackPoint!!.time, trackPoint.time).toSeconds()
+					val speed = getAverageSpeedKmh(tour.trackPoints.slice(startIndex until index + 1))
 
 					result.add(
 						SegmentRecord(
-							speedKmh = 0.0,
+							speedKmh = speed,
 							durationS = duration.toInt(),
-							time = startTrackPoint.time,
+							time = startTrackPoint!!.time,
 							segment = segment,
 							rankCreated = null,
 						)
@@ -77,5 +81,12 @@ class SegmentRecordService(
 
 	private fun getSegmentsForTour(tourId: UUID): List<Segment> {
 		return segmentRepository.findSegmentsByTourId(tourId)
+	}
+
+	fun getSegmentRecordsForSegment(segmentId: UUID, pageable: Pageable): CustomPage<SegmentRecordDto> {
+		return segmentRecordRepository
+			.getSegmentRecordsBySegmentIdOrderByDurationSAsc(segmentId, pageable)
+			.toCustomPage()
+			.mapTo { it.toDto() }
 	}
 }

@@ -12,6 +12,7 @@ import eu.sendzik.pedalmon.mapper.toEntity
 import eu.sendzik.pedalmon.model.TrackPoint
 import eu.sendzik.pedalmon.repository.SegmentRecordRepository
 import eu.sendzik.pedalmon.util.defaultGeometryFactory
+import getAverageSpeedKmh
 import jakarta.transaction.Transactional
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.LineString
@@ -100,15 +101,6 @@ class TourService(
 		.windowed(size = 2)
 		.sumOf { (a, b) -> calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude) }
 		.roundToInt()
-
-	private fun getAverageSpeedKmh(trackPoints: List<TrackPoint>): Double = trackPoints
-		.windowed(size = 2)
-		.map { (a, b) ->
-			val distance = calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude)
-			val timeTaken = Duration.between(a.time, b.time).toSeconds()
-			(distance / 1000.0) / (timeTaken / 3600.0)
-		}.filter { it > 1 }
-		.average()
 
 	private fun getTrackPointsFromTcx(tcx: TrainingCenterDatabaseDto): List<TrackPoint> {
 		return tcx.activities.activityList.flatMap { activity ->

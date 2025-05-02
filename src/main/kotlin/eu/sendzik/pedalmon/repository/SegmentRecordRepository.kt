@@ -1,6 +1,10 @@
 package eu.sendzik.pedalmon.repository
 
+import eu.sendzik.pedalmon.dto.CustomPage
+import eu.sendzik.pedalmon.dto.SegmentRecordDto
 import eu.sendzik.pedalmon.model.SegmentRecord
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 import java.util.UUID
@@ -18,4 +22,6 @@ WHERE id = :segmentRecordId
 
 	@Query("SELECT COUNT(*) FROM SegmentRecord s WHERE s.segment.id = :segmentId")
 	fun getSegmentRecordCount(segmentId: UUID): Int
+
+	fun getSegmentRecordsBySegmentIdOrderByDurationSAsc(segmentId: UUID, pageable: Pageable): Page<SegmentRecord>
 }

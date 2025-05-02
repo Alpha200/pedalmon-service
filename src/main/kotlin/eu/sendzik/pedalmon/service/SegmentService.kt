@@ -8,6 +8,7 @@ import eu.sendzik.pedalmon.mapper.toEntity
 import eu.sendzik.pedalmon.repository.SegmentRepository
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
+import java.util.UUID
 
 @Service
 class SegmentService(
@@ -20,5 +21,11 @@ class SegmentService(
 
 	fun getSegments(pageable: Pageable): CustomPage<SegmentDto> {
 		return segmentRepository.findAll(pageable).toCustomPage().mapTo { it.toDto() }
+	}
+
+	fun getSegment(segmentId: UUID): SegmentDto {
+		return segmentRepository.findById(segmentId)
+			.map { it.toDto() }
+			.orElseThrow()
 	}
 }

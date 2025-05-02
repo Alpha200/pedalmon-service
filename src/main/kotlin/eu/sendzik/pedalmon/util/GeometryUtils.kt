@@ -1,3 +1,7 @@
+import eu.sendzik.pedalmon.model.TrackPoint
+import java.time.Duration
+import kotlin.collections.component1
+import kotlin.collections.component2
 import kotlin.math.cos
 import kotlin.math.sqrt
 
@@ -14,3 +18,12 @@ fun calculateDistanceMeter(lat1: Double, lon1: Double, lat2: Double, lon2: Doubl
 
 	return distance
 }
+
+fun getAverageSpeedKmh(trackPoints: List<TrackPoint>): Double = trackPoints
+	.windowed(size = 2)
+	.map { (a, b) ->
+		val distance = calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+		val timeTaken = Duration.between(a.time, b.time).toSeconds()
+		(distance / 1000.0) / (timeTaken / 3600.0)
+	}.filter { it > 1 }
+	.average()
