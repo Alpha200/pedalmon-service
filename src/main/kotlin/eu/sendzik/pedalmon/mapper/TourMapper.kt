@@ -22,6 +22,7 @@ fun TourDto.toEntity(): Tour {
 		),
 		trackPoints = track.map { it.toEntity() }.toMutableList(),
 		segmentRecords = segmentRecords.map { it.toEntity() }.toMutableList(),
+		date = date,
 	)
 
 	return tour
@@ -36,5 +37,6 @@ fun Tour.toDto(): TourDto {
 		distanceMeter = distanceMeter,
 		track = trackPoints.map { it.toDto() }.toMutableList(),
 		segmentRecords = segmentRecords.map { it.toDto() }.toMutableList(),
+		date = date,
 	)
 }

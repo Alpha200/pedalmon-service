@@ -78,7 +78,7 @@ data class Trackpoint(
 	val time: ZonedDateTime,
 
 	@JacksonXmlProperty(localName = "Position")
-	val position: Position,
+	val position: Position?,
 
 	@JacksonXmlProperty(localName = "AltitudeMeters")
 	val altitudeMeters: Double,

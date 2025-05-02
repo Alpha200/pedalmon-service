@@ -2,7 +2,6 @@ package eu.sendzik.pedalmon.service
 
 import eu.sendzik.pedalmon.dto.CustomPage
 import eu.sendzik.pedalmon.dto.SegmentDto
-import eu.sendzik.pedalmon.dto.TourDto
 import eu.sendzik.pedalmon.dto.toCustomPage
 import eu.sendzik.pedalmon.mapper.toDto
 import eu.sendzik.pedalmon.mapper.toEntity

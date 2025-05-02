@@ -9,6 +9,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import org.locationtech.jts.geom.LineString
+import java.time.ZonedDateTime
 import java.util.UUID
 
 @Entity
@@ -20,6 +21,9 @@ class Tour(
 
 	@Column(name = "name")
 	var name: String,
+
+	@Column(name = "date")
+	var date: ZonedDateTime,
 
 	@Column(name = "average_speed_kmh")
 	var averageSpeedKmh: Double,

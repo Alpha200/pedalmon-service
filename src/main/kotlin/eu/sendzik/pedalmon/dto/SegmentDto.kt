@@ -9,9 +9,5 @@ data class SegmentDto(
 	@field:Size(max = 100)
 	var name: String,
 	@JsonFormat(shape = JsonFormat.Shape.ARRAY)
-	var start: Pair<Double, Double>,
-	@JsonFormat(shape = JsonFormat.Shape.ARRAY)
-	var end: Pair<Double, Double>,
-	@JsonFormat(shape = JsonFormat.Shape.ARRAY)
 	var path: List<Pair<Double, Double>>,
 )

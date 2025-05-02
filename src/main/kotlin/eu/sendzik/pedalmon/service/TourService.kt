@@ -19,7 +19,11 @@ import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.time.Duration
+import java.time.ZonedDateTime
 import java.util.UUID
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.windowed
 import kotlin.math.roundToInt
 
 @Service
@@ -35,38 +39,25 @@ class TourService(
 	}
 
 	fun importTcx(tcx: TrainingCenterDatabaseDto): TourDto {
+		val trackPoints = getTrackPointsFromTcx(tcx).toMutableList()
+		val tourDate = trackPoints.first().time
+		val averageHeartRate = trackPoints.mapNotNull { it.heartRateBpm }.average()
+
 		var tour = tourRepository.save(
 			Tour(
-				name = "Tour",
+				name = "Tour", // TODO: Generate name by start and end point city name
 				track = getTrackFromTcx(tcx),
 				trackPoints = mutableListOf(),
 				segmentRecords = mutableListOf(),
-				averageSpeedKmh = 0.0,
-				averageHeartRateBpm = null,
-				distanceMeter = 0,
+				averageSpeedKmh = getAverageSpeedKmh(trackPoints),
+				averageHeartRateBpm = if (averageHeartRate.isFinite()) averageHeartRate.roundToInt() else null,
+				distanceMeter = getDistanceMeter(trackPoints),
+				date = tourDate,
 			)
 		)
 
-		tour.trackPoints = getTrackPointsFromTcx(tcx).toMutableList()
-		tour.trackPoints.forEach { it.tour = tour }
-
-		val averageHeartRate = tour.trackPoints.mapNotNull { it.heartRateBpm }.average()
-
-		if (averageHeartRate.isFinite()) {
-			tour.averageHeartRateBpm = averageHeartRate.roundToInt()
-		}
-
-		tour.averageSpeedKmh = tour.trackPoints.windowed(size = 2).map { (a, b) ->
-			val distance = calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude)
-			val timeTaken = Duration.between(a.time, b.time).toSeconds()
-
-			(distance / 1000.0) / (timeTaken / 3600.0)
-		}.filter { it > 1 }.average()
-
-		tour.distanceMeter = tour.trackPoints.windowed(size = 2).sumOf { (a, b) ->
-			calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude)
-		}.roundToInt()
-
+		trackPoints.forEach { it.tour = tour }
+		tour.trackPoints = trackPoints
 		tour = tourRepository.save(tour)
 
 		tour.segmentRecords = segmentRecordService
@@ -94,12 +85,39 @@ class TourService(
 		return tour.toDto()
 	}
 
+	fun getTours(pageable: Pageable): CustomPage<TourDto> {
+		return tourRepository.findAllByOrderByDateDesc(pageable).toCustomPage().mapTo { it.toDto() }
+	}
+
+	fun getTour(id: UUID): TourDto {
+		return tourRepository
+			.findById(id)
+			.map { tour -> tour.toDto() }
+			.orElseThrow()
+	}
+
+	private fun getDistanceMeter(trackPoints: List<TrackPoint>) = trackPoints
+		.windowed(size = 2)
+		.sumOf { (a, b) -> calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude) }
+		.roundToInt()
+
+	private fun getAverageSpeedKmh(trackPoints: List<TrackPoint>): Double = trackPoints
+		.windowed(size = 2)
+		.map { (a, b) ->
+			val distance = calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude)
+			val timeTaken = Duration.between(a.time, b.time).toSeconds()
+			(distance / 1000.0) / (timeTaken / 3600.0)
+		}.filter { it > 1 }
+		.average()
+
 	private fun getTrackPointsFromTcx(tcx: TrainingCenterDatabaseDto): List<TrackPoint> {
 		return tcx.activities.activityList.flatMap { activity ->
 			activity.laps.flatMap { lap ->
-				lap.tracks.first().trackpoints.map { trackPoint ->
+				lap.tracks.first().trackpoints
+					.filter { trackPoint -> trackPoint.position != null }
+					.map { trackPoint ->
 					TrackPoint(
-						latitude = trackPoint.position.latitudeDegrees,
+						latitude = trackPoint.position!!.latitudeDegrees,
 						longitude = trackPoint.position.longitudeDegrees,
 						time = trackPoint.time,
 						heartRateBpm = trackPoint.heartRateBpm?.value,
@@ -113,9 +131,11 @@ class TourService(
 	private fun getTrackFromTcx(tcx: TrainingCenterDatabaseDto): LineString {
 		val coordinates = tcx.activities.activityList.flatMap { activity ->
 			activity.laps.flatMap { lap ->
-				lap.tracks.first().trackpoints.map { trackPoint ->
+				lap.tracks.first().trackpoints
+					.filter { trackPoint -> trackPoint.position != null }
+					.map { trackPoint ->
 					Coordinate(
-						trackPoint.position.longitudeDegrees,
+						trackPoint.position!!.longitudeDegrees,
 						trackPoint.position.latitudeDegrees
 					)
 				}
@@ -128,16 +148,5 @@ class TourService(
 				.create(coordinates.toTypedArray()),
 			defaultGeometryFactory
 		)
-	}
-
-	fun getTours(pageable: Pageable): CustomPage<TourDto> {
-		return tourRepository.findAll(pageable).toCustomPage().mapTo { it.toDto() }
-	}
-
-	fun getTour(id: UUID): TourDto {
-		return tourRepository
-			.findById(id)
-			.map { tour -> tour.toDto() }
-			.orElseThrow()
 	}
 }
