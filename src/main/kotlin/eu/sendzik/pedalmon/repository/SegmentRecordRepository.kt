@@ -11,7 +11,7 @@ import java.util.UUID
 
 interface SegmentRecordRepository : JpaRepository<SegmentRecord, UUID> {
 	@Query("""
-WITH ranks AS (SELECT DENSE_RANK() OVER (ORDER BY s.duration_s) rank, id
+WITH ranks AS (SELECT DENSE_RANK() OVER (ORDER BY s.duration_s, s.speed_kmh DESC) rank, id
                FROM segment_record s
                WHERE segment_id = :segmentId)
 SELECT rank
@@ -23,5 +23,5 @@ WHERE id = :segmentRecordId
 	@Query("SELECT COUNT(*) FROM SegmentRecord s WHERE s.segment.id = :segmentId")
 	fun getSegmentRecordCount(segmentId: UUID): Int
 
-	fun getSegmentRecordsBySegmentIdOrderByDurationSAsc(segmentId: UUID, pageable: Pageable): Page<SegmentRecord>
+	fun getSegmentRecordsBySegmentIdOrderByDurationSAscSpeedKmhDesc(segmentId: UUID, pageable: Pageable): Page<SegmentRecord>
 }

@@ -1,5 +1,6 @@
 package eu.sendzik.pedalmon.service
 
+import Gpx
 import calculateDistanceMeter
 import eu.sendzik.pedalmon.model.Tour
 import eu.sendzik.pedalmon.repository.TourRepository
@@ -19,8 +20,6 @@ import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
-import java.time.Duration
-import java.time.ZonedDateTime
 import java.util.UUID
 import kotlin.collections.component1
 import kotlin.collections.component2
@@ -41,24 +40,54 @@ class TourService(
 
 	fun importTcx(tcx: TrainingCenterDatabaseDto): TourDto {
 		val trackPoints = getTrackPointsFromTcx(tcx).toMutableList()
-		val tourDate = trackPoints.first().time
 		val averageHeartRate = trackPoints.mapNotNull { it.heartRateBpm }.average()
+		var tour = importTourWithTrackPoints(trackPoints, averageHeartRate)
+		return tour.toDto()
+	}
+
+	fun importGpx(gpx: Gpx): TourDto {
+		val trackPoints = getTrackPointsFromGpx(gpx)
+		val tour = importTourWithTrackPoints(trackPoints, null)
+		return tour.toDto()
+	}
+
+	fun getTours(pageable: Pageable): CustomPage<TourDto> {
+		return tourRepository.findAllByOrderByDateDesc(pageable).toCustomPage().mapTo { it.toDto() }
+	}
+
+	fun getTour(id: UUID): TourDto {
+		return tourRepository
+			.findById(id)
+			.map { tour -> tour.toDto() }
+			.orElseThrow()
+	}
+
+	private fun importTourWithTrackPoints(
+		trackPoints: List<TrackPoint>,
+		averageHeartRate: Double?
+	): Tour {
+		val tourDate = trackPoints.first().time
+		val averageHR = if (averageHeartRate != null && averageHeartRate.isFinite()) {
+			averageHeartRate.roundToInt()
+		} else {
+			null
+		}
 
 		var tour = tourRepository.save(
 			Tour(
 				name = "Tour", // TODO: Generate name by start and end point city name
-				track = getTrackFromTcx(tcx),
+				track = getTrackFromTrackPoints(trackPoints),
 				trackPoints = mutableListOf(),
 				segmentRecords = mutableListOf(),
 				averageSpeedKmh = getAverageSpeedKmh(trackPoints),
-				averageHeartRateBpm = if (averageHeartRate.isFinite()) averageHeartRate.roundToInt() else null,
+				averageHeartRateBpm = averageHR,
 				distanceMeter = getDistanceMeter(trackPoints),
 				date = tourDate,
 			)
 		)
 
 		trackPoints.forEach { it.tour = tour }
-		tour.trackPoints = trackPoints
+		tour.trackPoints = trackPoints.toMutableList()
 		tour = tourRepository.save(tour)
 
 		tour.segmentRecords = segmentRecordService
@@ -82,19 +111,7 @@ class TourService(
 
 			segmentRecordRepository.save(segmentRecord)
 		}
-
-		return tour.toDto()
-	}
-
-	fun getTours(pageable: Pageable): CustomPage<TourDto> {
-		return tourRepository.findAllByOrderByDateDesc(pageable).toCustomPage().mapTo { it.toDto() }
-	}
-
-	fun getTour(id: UUID): TourDto {
-		return tourRepository
-			.findById(id)
-			.map { tour -> tour.toDto() }
-			.orElseThrow()
+		return tour
 	}
 
 	private fun getDistanceMeter(trackPoints: List<TrackPoint>) = trackPoints
@@ -113,6 +130,7 @@ class TourService(
 						longitude = trackPoint.position.longitudeDegrees,
 						time = trackPoint.time,
 						heartRateBpm = trackPoint.heartRateBpm?.value,
+						elevation = trackPoint.altitudeMeters,
 					)
 				}
 			}
@@ -120,18 +138,24 @@ class TourService(
 		}
 	}
 
-	private fun getTrackFromTcx(tcx: TrainingCenterDatabaseDto): LineString {
-		val coordinates = tcx.activities.activityList.flatMap { activity ->
-			activity.laps.flatMap { lap ->
-				lap.tracks.first().trackpoints
-					.filter { trackPoint -> trackPoint.position != null }
-					.map { trackPoint ->
-					Coordinate(
-						trackPoint.position!!.longitudeDegrees,
-						trackPoint.position.latitudeDegrees
-					)
-				}
-			}
+	private fun getTrackPointsFromGpx(gpx: Gpx): List<TrackPoint> {
+		return gpx.trk.trkseg.trkpt.map { trackPoint ->
+			TrackPoint(
+				latitude = trackPoint.lat,
+				longitude = trackPoint.lon,
+				time = trackPoint.time,
+				heartRateBpm = null,
+				elevation = trackPoint.ele,
+			)
+		}
+	}
+
+	private fun getTrackFromTrackPoints(trackPoints: List<TrackPoint>): LineString {
+		val coordinates = trackPoints.map { trackPoint ->
+			Coordinate(
+				trackPoint.longitude,
+				trackPoint.latitude,
+			)
 		}
 
 		return LineString(

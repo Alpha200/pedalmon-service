@@ -1,5 +1,6 @@
 package eu.sendzik.pedalmon.controller
 
+import Gpx
 import eu.sendzik.pedalmon.service.TourService
 import eu.sendzik.pedalmon.dto.CustomPage
 import eu.sendzik.pedalmon.dto.TourDto
@@ -25,8 +26,13 @@ class TourController(
 	}
 
 	@PostMapping("/import/tcx")
-	fun importTour(@RequestBody tcx: TrainingCenterDatabaseDto): TourDto {
+	fun importTourByTcx(@RequestBody tcx: TrainingCenterDatabaseDto): TourDto {
 		return tourService.importTcx(tcx)
+	}
+
+	@PostMapping("/import/gpx")
+	fun importTourByGpx(@RequestBody gpx: Gpx): TourDto {
+		return tourService.importGpx(gpx)
 	}
 
 	@GetMapping()

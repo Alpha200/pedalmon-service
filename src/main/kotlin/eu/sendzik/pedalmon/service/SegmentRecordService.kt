@@ -85,7 +85,7 @@ class SegmentRecordService(
 
 	fun getSegmentRecordsForSegment(segmentId: UUID, pageable: Pageable): CustomPage<SegmentRecordDto> {
 		return segmentRecordRepository
-			.getSegmentRecordsBySegmentIdOrderByDurationSAsc(segmentId, pageable)
+			.getSegmentRecordsBySegmentIdOrderByDurationSAscSpeedKmhDesc(segmentId, pageable)
 			.toCustomPage()
 			.mapTo { it.toDto() }
 	}

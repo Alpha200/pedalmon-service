@@ -19,11 +19,16 @@ fun calculateDistanceMeter(lat1: Double, lon1: Double, lat2: Double, lon2: Doubl
 	return distance
 }
 
-fun getAverageSpeedKmh(trackPoints: List<TrackPoint>): Double = trackPoints
-	.windowed(size = 2)
-	.map { (a, b) ->
-		val distance = calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude)
-		val timeTaken = Duration.between(a.time, b.time).toSeconds()
-		(distance / 1000.0) / (timeTaken / 3600.0)
-	}.filter { it > 1 }
-	.average()
+fun getAverageSpeedKmh(trackPoints: List<TrackPoint>): Double {
+	val distanceM = trackPoints.windowed(2).sumOf { (tpA, tpB) ->
+		calculateDistanceMeter(
+			tpA.latitude,
+			tpA.longitude,
+			tpB.latitude,
+			tpB.longitude
+		)
+	}
+
+	val timeTakenS = Duration.between(trackPoints.first().time, trackPoints.last().time).toSeconds()
+	return (distanceM / 1000.0) / (timeTakenS / 3600.0)
+}

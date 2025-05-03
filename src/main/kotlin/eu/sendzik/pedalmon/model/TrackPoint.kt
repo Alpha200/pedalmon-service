@@ -28,4 +28,6 @@ class TrackPoint(
 	var time: ZonedDateTime,
 	@Column(name = "heart_rate_bpm")
 	var heartRateBpm: Int?,
+	@Column(name = "elevation")
+	var elevation: Double?,
 )

@@ -12,4 +12,6 @@ data class TrackPointDto(
 	var time: ZonedDateTime,
 	@JsonProperty("hr")
 	var heartRateBpm: Int?,
+	@JsonProperty("el")
+	var elevation: Double?,
 )

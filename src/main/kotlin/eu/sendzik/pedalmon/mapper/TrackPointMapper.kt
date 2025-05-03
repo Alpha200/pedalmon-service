@@ -9,6 +9,7 @@ fun TrackPointDto.toEntity(): TrackPoint {
 		longitude = longitude,
 		time = time,
 		heartRateBpm = heartRateBpm,
+		elevation = elevation,
 	)
 }
 
@@ -18,5 +19,6 @@ fun TrackPoint.toDto(): TrackPointDto {
 		longitude = longitude,
 		time = time,
 		heartRateBpm = heartRateBpm,
+		elevation = elevation,
 	)
 }
