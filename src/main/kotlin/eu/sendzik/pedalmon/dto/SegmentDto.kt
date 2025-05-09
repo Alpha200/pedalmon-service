@@ -10,4 +10,5 @@ data class SegmentDto(
 	var name: String,
 	@JsonFormat(shape = JsonFormat.Shape.ARRAY)
 	var path: List<Pair<Double, Double>>,
+	var userId : UUID?
 )

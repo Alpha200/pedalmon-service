@@ -27,6 +27,7 @@ fun SegmentDto.toEntity(): Segment {
 			defaultGeometryFactory
 		),
 		name = name,
+		userId = userId,
 	)
 }
 
@@ -37,5 +38,6 @@ fun Segment.toDto(): SegmentDto {
 			Pair(it.x, it.y)
 		},
 		name = name,
+		userId = userId,
 	)
 }

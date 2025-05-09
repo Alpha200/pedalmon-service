@@ -12,4 +12,5 @@ data class TourDto (
 	val distanceMeter: Int,
 	val track: MutableList<TrackPointDto>,
 	val segmentRecords: MutableList<SegmentRecordDto>,
+	val userId: UUID?,
 )

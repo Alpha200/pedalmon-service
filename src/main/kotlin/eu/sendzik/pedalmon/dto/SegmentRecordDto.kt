@@ -10,5 +10,6 @@ data class SegmentRecordDto(
 	var speedKmh: Double,
 	var durationS: Int,
 	var time: ZonedDateTime,
-	var rankCreated: Int?
+	var rankCreated: Int?,
+	var userId: UUID?,
 )

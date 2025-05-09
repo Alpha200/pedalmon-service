@@ -1,6 +1,7 @@
 package eu.sendzik.pedalmon.service
 
 import calculateDistanceMeter
+import eu.sendzik.pedalmon.component.PedalmonSec
 import eu.sendzik.pedalmon.dto.CustomPage
 import eu.sendzik.pedalmon.dto.SegmentRecordDto
 import eu.sendzik.pedalmon.dto.toCustomPage
@@ -23,6 +24,7 @@ import java.util.UUID
 class SegmentRecordService(
 	private val segmentRecordRepository: SegmentRecordRepository,
 	private val segmentRepository: SegmentRepository,
+	private val pedalmonSec: PedalmonSec,
 ) {
 	fun getSegmentRecords(pageable: Pageable): CustomPage<SegmentRecordDto> {
 		return segmentRecordRepository.findAll(pageable).toCustomPage().mapTo { it.toDto() }
@@ -69,6 +71,7 @@ class SegmentRecordService(
 							time = startTrackPoint!!.time,
 							segment = segment,
 							rankCreated = null,
+							userId = pedalmonSec.getUserId(),
 						)
 					)
 					startTrackPoint = null

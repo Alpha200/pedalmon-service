@@ -2,6 +2,7 @@ package eu.sendzik.pedalmon.service
 
 import Gpx
 import calculateDistanceMeter
+import eu.sendzik.pedalmon.component.PedalmonSec
 import eu.sendzik.pedalmon.model.Tour
 import eu.sendzik.pedalmon.repository.TourRepository
 import eu.sendzik.pedalmon.dto.CustomPage
@@ -32,6 +33,7 @@ class TourService(
 	private val tourRepository: TourRepository,
 	private val segmentRecordService: SegmentRecordService,
 	private val segmentRecordRepository: SegmentRecordRepository,
+	private val pedalmonSec: PedalmonSec,
 ) {
 	fun createTour(tourDto: TourDto): TourDto {
 		val tour = tourDto.toEntity()
@@ -83,6 +85,7 @@ class TourService(
 				averageHeartRateBpm = averageHR,
 				distanceMeter = getDistanceMeter(trackPoints),
 				date = tourDate,
+				userId = pedalmonSec.getUserId(),
 			)
 		)
 
