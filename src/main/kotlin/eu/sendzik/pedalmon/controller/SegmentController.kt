@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
@@ -27,8 +28,11 @@ class SegmentController(
 	}
 
 	@GetMapping()
-	fun getSegments(pageable: Pageable): CustomPage<SegmentDto> {
-		return segmentService.getSegments(pageable)
+	fun getSegments(
+		@RequestParam("filter.ids") filterIds: List<UUID>?,
+		pageable: Pageable,
+	): CustomPage<SegmentDto> {
+		return segmentService.getSegments(pageable, filterIds)
 	}
 
 	@GetMapping("{segmentId}")
@@ -42,5 +46,15 @@ class SegmentController(
 		pageable: Pageable
 	): CustomPage<SegmentRecordDto> {
 		return segmentRecordService.getSegmentRecordsForSegment(segmentId, pageable)
+	}
+
+	@GetMapping("bounds/{xMin},{yMin},{xMax},{yMax}/ids")
+	fun getSegmentIdsByBounds(
+		@PathVariable xMin: Double,
+		@PathVariable yMin: Double,
+		@PathVariable xMax: Double,
+		@PathVariable yMax: Double,
+	): List<UUID> {
+		return segmentService.getSegmentsByBounds(xMin, yMin, xMax, yMax)
 	}
 }

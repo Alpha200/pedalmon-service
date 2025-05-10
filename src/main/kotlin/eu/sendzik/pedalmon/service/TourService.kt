@@ -41,16 +41,14 @@ class TourService(
 	}
 
 	fun importTcx(tcx: TrainingCenterDatabaseDto): TourDto {
-		val trackPoints = getTrackPointsFromTcx(tcx).toMutableList()
+		val trackPoints = getTrackPointsFromTcx(tcx)
 		val averageHeartRate = trackPoints.mapNotNull { it.heartRateBpm }.average()
-		var tour = importTourWithTrackPoints(trackPoints, averageHeartRate)
-		return tour.toDto()
+		return importTourWithTrackPoints(trackPoints, averageHeartRate).toDto()
 	}
 
 	fun importGpx(gpx: Gpx): TourDto {
 		val trackPoints = getTrackPointsFromGpx(gpx)
-		val tour = importTourWithTrackPoints(trackPoints, null)
-		return tour.toDto()
+		return importTourWithTrackPoints(trackPoints, null).toDto()
 	}
 
 	fun getTours(pageable: Pageable): CustomPage<TourDto> {
