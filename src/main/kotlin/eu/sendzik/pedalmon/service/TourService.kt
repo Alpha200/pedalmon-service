@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.UUID
@@ -51,8 +52,11 @@ class TourService(
 		return importTourWithTrackPoints(trackPoints, null).toDto()
 	}
 
-	fun getTours(pageable: Pageable): CustomPage<TourDto> {
-		return tourRepository.findAllByOrderByDateDesc(pageable).toCustomPage().mapTo { it.toDto() }
+	fun getTours(filterIds: List<UUID>?, pageable: Pageable): CustomPage<TourDto> {
+		return tourRepository.findAllByOrderByDateDesc(
+			filterIds,
+			pageable
+		).toCustomPage().mapTo { it.toDto() }
 	}
 
 	fun getTour(id: UUID): TourDto {
@@ -165,5 +169,9 @@ class TourService(
 				.create(coordinates.toTypedArray()),
 			defaultGeometryFactory
 		)
+	}
+
+	fun getToursByBounds(xMin: Double, yMin: Double, xMax: Double, yMax: Double): List<UUID> {
+		return tourRepository.findByBounds(xMin, yMin, xMax, yMax, PageRequest.of(0, 20))
 	}
 }

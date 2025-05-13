@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.data.domain.Pageable
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import java.util.UUID
 
 @RestController
@@ -36,12 +37,25 @@ class TourController(
 	}
 
 	@GetMapping()
-	fun getTours(pageable: Pageable): CustomPage<TourDto> {
-		return tourService.getTours(pageable)
+	fun getTours(
+		@RequestParam("filter.ids") filterIds: List<UUID>?,
+		pageable: Pageable,
+		): CustomPage<TourDto> {
+		return tourService.getTours(filterIds, pageable)
 	}
 
 	@GetMapping("{id}")
 	fun getTour(@PathVariable id: UUID): TourDto {
 		return tourService.getTour(id)
+	}
+
+	@GetMapping("bounds/{xMin},{yMin},{xMax},{yMax}/ids")
+	fun getTourIdsByBounds(
+		@PathVariable xMin: Double,
+		@PathVariable yMin: Double,
+		@PathVariable xMax: Double,
+		@PathVariable yMax: Double,
+	): List<UUID> {
+		return tourService.getToursByBounds(xMin, yMin, xMax, yMax)
 	}
 }
