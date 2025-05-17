@@ -1,7 +1,5 @@
 package eu.sendzik.pedalmon.repository
 
-import eu.sendzik.pedalmon.dto.CustomPage
-import eu.sendzik.pedalmon.dto.SegmentRecordDto
 import eu.sendzik.pedalmon.model.SegmentRecord
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable

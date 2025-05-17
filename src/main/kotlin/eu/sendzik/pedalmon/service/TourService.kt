@@ -1,7 +1,6 @@
 package eu.sendzik.pedalmon.service
 
 import Gpx
-import calculateDistanceMeter
 import eu.sendzik.pedalmon.component.PedalmonSec
 import eu.sendzik.pedalmon.model.Tour
 import eu.sendzik.pedalmon.repository.TourRepository
@@ -24,9 +23,6 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
 import java.util.UUID
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.windowed
 import kotlin.math.roundToInt
 
 @Service

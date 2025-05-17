@@ -3,23 +3,22 @@ package eu.sendzik.pedalmon.service
 import LiveSegmentProgress
 import LiveSegmentRequestResultDto
 import LiveSegmentResult
+import calculateDistanceMeter
 import distanceAlongLineInMeters
 import eu.sendzik.pedalmon.dto.GeoPosition
 import eu.sendzik.pedalmon.model.LiveSegment
 import eu.sendzik.pedalmon.model.Segment
 import eu.sendzik.pedalmon.model.SegmentRecord
+import eu.sendzik.pedalmon.model.Tour
 import eu.sendzik.pedalmon.repository.LiveSegmentRepository
 import eu.sendzik.pedalmon.repository.SegmentRecordRepository
 import eu.sendzik.pedalmon.repository.SegmentRepository
 import eu.sendzik.pedalmon.util.defaultGeometryFactory
 import lengthInMeters
 import org.locationtech.jts.geom.Coordinate
-import org.locationtech.jts.geom.Point
-import org.locationtech.jts.linearref.LengthIndexedLine
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import projectTo3857
 import java.time.Duration
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -89,7 +88,14 @@ class LiveSegmentService(
 				segment.path,
 				defaultGeometryFactory.createPoint(Coordinate(position.x, position.y))
 			)
+			val timeElapsedSeconds = Duration.between(currentLiveSegment.startTimestamp, date).toMillis() / 1000.0
 			val segmentRecord = getBestSegmentRecord(currentLiveSegment.segmentId)
+
+			val distance = getSegmentDistanceMetersAfterTimeFromSegmentRecord(
+				segmentRecord,
+				segment,
+				timeElapsedSeconds.roundToInt()
+			)
 
 			currentLiveSegment.lastTimestamp = date
 			liveSegmentRepository.save(currentLiveSegment)
@@ -98,9 +104,9 @@ class LiveSegmentService(
 				status = LiveSegmentStatus.TRACKING,
 				liveSegmentProgress = LiveSegmentProgress(
 					segmentId = currentLiveSegment.segmentId,
-					timeElapsedSeconds = Duration.between(currentLiveSegment.startTimestamp, date).toMillis() / 1000.0,
+					timeElapsedSeconds = timeElapsedSeconds,
 					distanceMeters = distanceMeters.roundToInt(),
-					distanceMetersBest = 0,
+					distanceMetersBest = distance,
 					distanceMetersTotal = lengthInMeters(segment.path).roundToInt(),
 				),
 				liveSegmentResult = null,
@@ -113,6 +119,58 @@ class LiveSegmentService(
 				liveSegmentResult = null,
 			)
 		}
+	}
+
+	private fun getSegmentDistanceMetersAfterTimeFromSegmentRecord(
+		segmentRecord: SegmentRecord,
+		segment: Segment,
+		timeElapsedSeconds: Int
+	): Int {
+		val tour = segmentRecord.tour
+
+		if (tour == null) {
+			return 0
+		}
+
+		val index = getClosestIndexAfterSeconds(
+			tour,
+			segmentRecord.time.plusSeconds(timeElapsedSeconds.toLong())
+		)
+
+		if (index == null) {
+			return lengthInMeters(segment.path).roundToInt()
+		} else if (index == 0) {
+			return 0
+		}
+
+		val firstPoint = tour.trackPoints[index - 1]
+		val secondPoint = tour.trackPoints[index]
+
+		val distanceMeters = distanceAlongLineInMeters(
+			segment.path,
+			defaultGeometryFactory.createPoint(Coordinate(firstPoint.longitude, firstPoint.latitude))
+		)
+
+		val distanceBetweenLastPoints = calculateDistanceMeter(
+			firstPoint.latitude,
+			firstPoint.longitude,
+			secondPoint.latitude,
+			secondPoint.longitude
+		)
+
+		val timeRemaining = timeElapsedSeconds - Duration.between(segmentRecord.time, firstPoint.time).toSeconds()
+		val percentageBetweenLastPoints = timeRemaining.toDouble() / Duration.between(firstPoint.time, secondPoint.time).toSeconds()
+
+		return (distanceMeters + distanceBetweenLastPoints * percentageBetweenLastPoints).roundToInt()
+	}
+
+	private fun getClosestIndexAfterSeconds(
+		tour: Tour,
+		time: ZonedDateTime
+	): Int? {
+		return tour.trackPoints
+			.indexOfFirst { it.time > time }
+			.takeIf { it != -1 }
 	}
 
 	private fun finishLiveSegment(
