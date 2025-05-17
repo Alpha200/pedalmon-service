@@ -9,7 +9,7 @@ import java.util.UUID
 @RequestScope
 @Component
 class PedalmonSec {
-	fun getUserId(): UUID {
+	val userId get(): UUID {
 		val authentication = SecurityContextHolder.getContext().authentication as JwtAuthenticationToken
 		return UUID.fromString(authentication.token.subject)
 	}

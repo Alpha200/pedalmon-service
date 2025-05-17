@@ -24,4 +24,7 @@ WHERE id = :segmentRecordId
 	fun getSegmentRecordCount(segmentId: UUID): Int
 
 	fun getSegmentRecordsBySegmentIdOrderByDurationSAscSpeedKmhDesc(segmentId: UUID, pageable: Pageable): Page<SegmentRecord>
+
+	@Query("SELECT COUNT(*) FROM SegmentRecord s WHERE s.segment.id = :segmentId AND s.durationS < :elapsedTotal")
+	fun getRankForSegmentAndDuration(segmentId: UUID, elapsedTotal: Int): Int
 }

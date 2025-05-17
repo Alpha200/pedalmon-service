@@ -1,9 +1,9 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
+	kotlin("jvm") version "2.1.20"
+	kotlin("plugin.spring") version "2.1.21"
 	id("org.springframework.boot") version "3.4.5"
 	id("io.spring.dependency-management") version "1.1.7"
-	kotlin("plugin.jpa") version "1.9.25"
+	kotlin("plugin.jpa") version "2.1.21"
 }
 
 group = "eu.sendzik"
@@ -17,9 +17,11 @@ java {
 
 repositories {
 	mavenCentral()
+	maven { url = uri("https://repo.osgeo.org/repository/release/") }
 }
 
 val hibernateVersion = "6.6.13.Final"
+val geotoolsVersion = "33.1"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -35,6 +37,12 @@ dependencies {
 	implementation("org.hibernate:hibernate-spatial:${hibernateVersion}")
 	implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
 	implementation("org.geolatte:geolatte-geom")
+	implementation("org.geotools:gt-main:${geotoolsVersion}") {
+		exclude(group = "javax.media", module = "jai_core")
+	}
+	implementation("org.geotools:gt-epsg-wkt:${geotoolsVersion}") {
+		exclude(group = "javax.media", module = "jai_core")
+	}
 	runtimeOnly("org.postgresql:postgresql")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")

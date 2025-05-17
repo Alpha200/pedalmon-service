@@ -39,7 +39,7 @@ class SegmentRecordService(
 		segment: Segment,
 		tour: Tour
 	): List<SegmentRecord> {
-		var result = mutableListOf<SegmentRecord>()
+		val result = mutableListOf<SegmentRecord>()
 		var startTrackPoint: TrackPoint? = null
 		var startIndex = 0
 
@@ -68,10 +68,10 @@ class SegmentRecordService(
 						SegmentRecord(
 							speedKmh = speed,
 							durationS = duration.toInt(),
-							time = startTrackPoint!!.time,
+							time = startTrackPoint.time,
 							segment = segment,
 							rankCreated = null,
-							userId = pedalmonSec.getUserId(),
+							userId = pedalmonSec.userId
 						)
 					)
 					startTrackPoint = null

@@ -16,6 +16,7 @@ import eu.sendzik.pedalmon.repository.SegmentRecordRepository
 import eu.sendzik.pedalmon.util.defaultGeometryFactory
 import getAverageSpeedKmh
 import jakarta.transaction.Transactional
+import lengthInMeters
 import org.locationtech.jts.geom.Coordinate
 import org.locationtech.jts.geom.LineString
 import org.locationtech.jts.geom.impl.CoordinateArraySequenceFactory
@@ -77,17 +78,19 @@ class TourService(
 			null
 		}
 
+		val track = getTrackFromTrackPoints(trackPoints)
+
 		var tour = tourRepository.save(
 			Tour(
 				name = "Tour", // TODO: Generate name by start and end point city name
-				track = getTrackFromTrackPoints(trackPoints),
+				track = track,
 				trackPoints = mutableListOf(),
 				segmentRecords = mutableListOf(),
 				averageSpeedKmh = getAverageSpeedKmh(trackPoints),
 				averageHeartRateBpm = averageHR,
-				distanceMeter = getDistanceMeter(trackPoints),
+				distanceMeter = lengthInMeters(track).roundToInt(),
 				date = tourDate,
-				userId = pedalmonSec.getUserId(),
+				userId = pedalmonSec.userId
 			)
 		)
 
@@ -118,11 +121,6 @@ class TourService(
 		}
 		return tour
 	}
-
-	private fun getDistanceMeter(trackPoints: List<TrackPoint>) = trackPoints
-		.windowed(size = 2)
-		.sumOf { (a, b) -> calculateDistanceMeter(a.latitude, a.longitude, b.latitude, b.longitude) }
-		.roundToInt()
 
 	private fun getTrackPointsFromTcx(tcx: TrainingCenterDatabaseDto): List<TrackPoint> {
 		return tcx.activities.activityList.flatMap { activity ->

@@ -2,6 +2,7 @@ package eu.sendzik.pedalmon.repository
 
 import eu.sendzik.pedalmon.model.Segment
 import org.springframework.data.domain.Page
+import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
@@ -16,4 +17,10 @@ interface SegmentRepository : JpaRepository<Segment, UUID> {
 	fun findByBounds(xMin: Double, yMin: Double, xMax: Double, yMax: Double, pageable: Pageable): List<UUID>
 	@Query("SELECT s FROM Segment s WHERE :filterIds IS NULL OR s.id IN (:filterIds)")
 	fun findAllByIdIn(filterIds: List<UUID>?, pageable: Pageable): Page<Segment>
+	@Query("SELECT s FROM Segment s WHERE CAST(ST_DWithin(s.pointStart, ST_Point(:x, :y, 4326), 10) AS BOOLEAN)")
+	fun findSegmentsWithStart(x: Double, y: Double, pageable: Pageable): Page<Segment>
+	@Query("SELECT s FROM Segment s WHERE CAST(ST_DWithin(s.pointEnd, ST_Point(:x, :y, 4326), 10) AS BOOLEAN)")
+	fun findSegmentsWithEnd(x: Double, y: Double, pageable: Pageable): Page<Segment>
+	@Query("SELECT s FROM Segment s WHERE CAST(ST_DWithin(s.path, ST_Point(:x, :y, 4326), 10) AS BOOLEAN)")
+	fun findSegmentsThatIntersect(x: Double, y: Double, pageable: Pageable): Page<Segment>
 }
