@@ -31,6 +31,6 @@ class SegmentService(
 	}
 
 	fun getSegmentsByBounds(xMin: Double, yMin: Double, xMax: Double, yMax: Double): List<UUID> {
-		return segmentRepository.findByBounds(xMin, yMin, xMax, yMax, PageRequest.of(0, 5))
+		return segmentRepository.findByBounds(xMin, yMin, xMax, yMax, PageRequest.of(0, 20))
 	}
 }

@@ -14,6 +14,7 @@ import eu.sendzik.pedalmon.repository.LiveSegmentRepository
 import eu.sendzik.pedalmon.repository.SegmentRecordRepository
 import eu.sendzik.pedalmon.repository.SegmentRepository
 import eu.sendzik.pedalmon.util.defaultGeometryFactory
+import jakarta.transaction.Transactional
 import lengthInMeters
 import org.locationtech.jts.geom.Coordinate
 import org.springframework.data.domain.PageRequest
@@ -30,6 +31,7 @@ class LiveSegmentService(
 	private val segmentRecordRepository: SegmentRecordRepository,
 	private val segmentRepository: SegmentRepository,
 ) {
+	@Transactional
 	fun submitPosition(
 		position: GeoPosition,
 		date: ZonedDateTime,
